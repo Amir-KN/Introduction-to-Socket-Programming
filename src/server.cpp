@@ -1,9 +1,9 @@
 #include "../headers/server.hpp"
 
-Server::Server()
+Server::Server(int _port)
 {
     IsContinue = true ;
-    Port = PORT ;    
+    Port = _port ;    
 }
 
 void Server::Run()
@@ -121,7 +121,7 @@ void RemoveClient(int ClientId){
 
 int main(int argc, char const *argv[])
 {
-    Server Server;
+    Server Server(PORT);
     Server.Run();
 
     return 0;

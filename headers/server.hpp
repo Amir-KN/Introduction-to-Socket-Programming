@@ -15,7 +15,7 @@ class ClientMessage{
 class Server
 {
 public:
-    Server();
+    Server(int _port);
     void Run();
 
 private:
