@@ -44,8 +44,8 @@ void Client::Run()
                 { // Message From Server
                     try
                     {
-                        string temp = Recv(ServerFd);
-                        cout << temp << endl;
+                        string Message = Recv(ServerFd);
+                        cout << Message << endl;
                     }
                     catch(string Error)
                     {
@@ -93,7 +93,8 @@ void Client::SendToServer(vector<string> commands, string command){
         cout << "   --> Error : You can not send message for yourself !! <--" << endl;
         return ;
     }
-    Send(ServerFd, command);   
+    Send(ServerFd, command); 
+    cout << "   --> Number Successfully Sent <--" << endl ;  
 }
 
 bool Client::GetFromBuffer(){
