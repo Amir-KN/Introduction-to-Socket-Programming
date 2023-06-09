@@ -22,9 +22,11 @@ private:
 
     string Recv(int ServerFd);
 
-    void Send(int ServerFd, string mess);
+    void Send(int ServerFd, string mess);\
 
-    
+    void SendNumberToServer(string Number, string TargetClient);
+
+    bool IsDigit(string str);
 
     vector<string> BreakString(string str, char sep);
 

@@ -50,7 +50,7 @@ void Client::Run()
                     catch(string Error)
                     {
                         cout << Error << endl ;
-
+                        exit(0);
                     }
                 }
 
@@ -89,17 +89,42 @@ bool Client::GetFromBuffer(){
     vector<string> commands = BreakString(command, ' ');
 
     if( commands[0] ==  "send"){
-        cout << "SEND" << endl;
+        if (commands.size() != 3){
+            cout << "   --> Error : Incorrect Argument for send command. <--" << endl;
+            return true;
+        }
+        SendNumberToServer(commands[2], commands[1]);
     }
+
     else if( commands[0] == "exit" ){
         cout << "EXIT" << endl;
         return false;
     }
+
     else {
         cout << "   --> Bad Command <--" << endl;
     }
-    return true;
 
+    return true;
+}
+
+void Client::SendNumberToServer(string Number, string TargetClient){
+    if ( (!IsDigit(TargetClient)) || (!IsDigit(Number)) ){
+
+    }
+    Send(ServerFd, "send" + ' ' + TargetClient + ' ' + Number);
+    string RecMess = Recv(ServerFd);
+    cout << RecMess << endl;
+}
+
+bool Client::IsDigit(string str)
+{
+    for (int i = 0; i < str.length(); i++)
+    {
+        if ((str[i] != '0') && (!isdigit(str[i])))
+            return false;
+    }
+    return true;
 }
 
 vector<string> Client::BreakString(string str, char sep)
