@@ -18,10 +18,11 @@
 
 using namespace std;
 
-const int MAX_LEN_MESS = 100 ;
+const int MAX_LEN_MESS = 256 ;
 const int MAX_CLIENT = 5;
 const int PORT = 8000;
 const string DEFULT_IP = "127.0.0.1" ;
+const char SEP = ' ' ;
 
 
 #endif

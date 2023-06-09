@@ -5,10 +5,12 @@
 
 class ClientMessage{
     public :
+        ClientMessage(int _ClientId, int _Number, int _TargetClient);
+        string GetMessage();
 
     private :
         int ClientId;
-        string Message;
+        int Number;
         int TargetClient;
 };
 
@@ -39,6 +41,15 @@ private:
     string Recv(int ClientFd);
 
     void Send(int ClientFd, string Message);
+
+    void PrintArchive();
+
+    void SendNumber(vector<string> commands, int ClientFd);
+
+    vector<string> BreakString(string str, char sep);
+
+    bool IsClientExist(int ClientId);
+    
 };
 
 #endif

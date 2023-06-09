@@ -14,16 +14,16 @@ void Client::Run()
         return ;
     }
 
-
     FD_ZERO(&MasterSet);
     MaxSd = ServerFd;
     FD_SET(ServerFd, &MasterSet);
     FD_SET(fileno(stdin), &MasterSet);
 
-    cout << "> Write Command : " << endl
-        << "--> send <Target Client Id> <Number>" << endl
-        << "--> exit"
-        << endl;
+    cout << ">Write Command : " << endl
+         << "--> send <Target Client Id> <Number>" << endl
+         << "--> get : Get All Online Client " << endl
+         << "--> exit"
+         << endl;
 
     while (IsContinue)
     {
@@ -81,23 +81,37 @@ bool Client::ConnectToServer()
     return true;
 }
 
+void Client::SendToServer(vector<string> commands, string command){
+    Send(ServerFd, "give");
+    string str_fd = Recv(ServerFd);
+    int ClientFd = stoi(str_fd);
+    if ( (commands.size() != 3) || (!IsDigit(commands[1])) || (!IsDigit(commands[2])) ){
+        cout << "   --> Error : Incorrect Argument for send command! <--" << endl;
+        return ;
+    }
+    if (stoi(commands[1]) == ClientFd) {
+        cout << "   --> Error : You can not send message for yourself !! <--" << endl;
+        return ;
+    }
+    Send(ServerFd, command);   
+}
 
 bool Client::GetFromBuffer(){
     string command;
     getline(cin, command);
     if ((command == " ") || (command == "\n") || (command == "") ) return true ;
-    vector<string> commands = BreakString(command, ' ');
+    vector<string> commands = BreakString(command, SEP);
 
     if( commands[0] ==  "send"){
-        if (commands.size() != 3){
-            cout << "   --> Error : Incorrect Argument for send command. <--" << endl;
-            return true;
-        }
-        SendNumberToServer(commands[2], commands[1]);
+        SendToServer(commands, command);
     }
-
+    else if( commands[0] ==  "get"){
+        Send(ServerFd, "get");
+        string mess = Recv(ServerFd);
+        cout << mess << endl;
+    }
     else if( commands[0] == "exit" ){
-        cout << "EXIT" << endl;
+        cout << "   --> Bye <--" << endl;
         return false;
     }
 
@@ -106,15 +120,6 @@ bool Client::GetFromBuffer(){
     }
 
     return true;
-}
-
-void Client::SendNumberToServer(string Number, string TargetClient){
-    if ( (!IsDigit(TargetClient)) || (!IsDigit(Number)) ){
-
-    }
-    Send(ServerFd, "send" + ' ' + TargetClient + ' ' + Number);
-    string RecMess = Recv(ServerFd);
-    cout << RecMess << endl;
 }
 
 bool Client::IsDigit(string str)

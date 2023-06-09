@@ -1,5 +1,18 @@
 #include "../headers/server.hpp"
 
+ClientMessage::ClientMessage(int _ClientId, int _Number, int _TargetClient){
+    ClientId = _ClientId ;
+    Number = _Number ;
+    TargetClient = _TargetClient ;
+}
+
+string ClientMessage::GetMessage(){
+    string mess = "From Client : " + to_string(ClientId) + "\n"
+         + "To Client : " + to_string(TargetClient) + "\n"
+         + "Number : " + to_string(Number) + "\n";
+    return mess ;
+}
+
 Server::Server(int _port)
 {
     IsContinue = true ;
@@ -47,12 +60,20 @@ void Server::Run()
                         MaxSd = NewSocket;
                     OnlineClient.push_back(NewSocket);
 
-                    cout << "New Client Connected. fd = " << NewSocket << endl;
+                    cout << endl << "JOIN :   -- > client " << NewSocket << " <--" << endl;
                 }
 
                 else
                 { // recv message from client
-                    GiveMessFromClient(i);
+                    try
+                    {
+                        GiveMessFromClient(i);
+                    }
+                    catch (string Error)
+                    {
+                        cout << Error << endl;
+                        RemoveClient(i);                        
+                    }
                 }
             }
         }
@@ -93,20 +114,71 @@ int Server::AcceptClient(int ServerFd)
 
 bool Server::GetFromBuffer()
 {
+    string command;
+    getline(cin, command);
+    if ((command == " ") || (command == "\n") || (command == "") ) return true ;
 
+    if( command ==  "1"){
+        PrintArchive();
+    }
+
+    else if( command == "2" ){
+        cout << "EXIT" << endl;
+        return false;
+    }
+
+    else {
+        cout << "   --> Bad Command <--" << endl;
+    }
+
+    return true;
 
 }
 
 void Server::GiveMessFromClient(int ClientFd)
 {
-
+    string mess = Recv(ClientFd);
+    vector<string> commands = BreakString(mess, SEP);
+    
+    if (commands[0] == "send"){
+        SendNumber(commands, ClientFd);
+    }
+    else if (commands[0] == "get"){
+        string mess = "Online Clients :";
+        cout << OnlineClient.size() << endl;
+        for (int i = 0 ; i < OnlineClient.size() ; i++){
+            mess += (" " + to_string(OnlineClient[i]));
+        }
+        Send(ClientFd, mess);
+    }
+    if (commands[0] == "give"){
+        Send(ClientFd, to_string(ClientFd));
+    }
 }
 
+void Server::SendNumber(vector<string> commands, int ClientFd){
+    if (!IsClientExist(stoi(commands[1]))){
+        Send(ClientFd, "    --> Error : The Clinet Does not Exist! <--");
+        return ;
+    }
+    int target_client = stoi(commands[1]);
+    string mess = "New Message : " + to_string(stoi(commands[2])+1) + "\nFrom : " + to_string(ClientFd) + "\n--------------------\n" ;
+                    
+    Send(target_client, mess);
+
+    ClientMessage new_mess(ClientFd, stoi(commands[2])+1, target_client);
+    ArchiveMessage.push_back(new_mess);
+    cout << "--> New : " << endl << new_mess.GetMessage() << endl ;
+}
 
 string Server::Recv(int ClientFd)
 {
     memset(Buffer, 0, MAX_LEN_MESS);
-    recv(ClientFd, Buffer, MAX_LEN_MESS, 0);
+    int Status = recv(ClientFd, Buffer, MAX_LEN_MESS, 0);
+    if (Status == 0) {
+        string Error = "\n   --> Client " + to_string(ClientFd) + " Closed! <--\n"  ;
+        throw Error ;
+    }
     return string(Buffer);
 }
 
@@ -115,9 +187,46 @@ void Server::Send(int ClientFd, string Message)
     send(ClientFd, Message.c_str(), Message.length(), 0);
 }
 
-void RemoveClient(int ClientId){
-
+void Server::PrintArchive(){
+    if (ArchiveMessage.size() == 0){
+        cout << "   --> There is no any message yet! <--" << endl;
+        return ;
+    }
+    for(int i = 0 ; i < ArchiveMessage.size() ; i++){
+        cout << ArchiveMessage[i].GetMessage();
+        cout << "----------------------------------" << endl;
+    }
+    cout << endl ;
 }
+
+void Server::RemoveClient(int ClientId){
+    close(ClientId);
+    FD_CLR(ClientId, &MasterSet);
+    for(int i = 0 ; i < OnlineClient.size() ; i++){
+        if (OnlineClient[i] == ClientId)
+            OnlineClient.erase(OnlineClient.begin() + i);
+    }
+}
+
+bool Server::IsClientExist(int ClientId){
+    for (int i = 0 ; i < OnlineClient.size() ; i++){
+        if (ClientId == OnlineClient[i])
+            return true;
+    }
+    return false;
+}
+
+vector<string> Server::BreakString(string str, char sep)
+{
+    istringstream ss(str);
+    string word;
+    vector<string> words;
+
+    while (getline(ss, word, sep))
+        words.push_back(word);
+    return words;
+}
+
 
 int main(int argc, char const *argv[])
 {

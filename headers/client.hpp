@@ -24,10 +24,10 @@ private:
 
     void Send(int ServerFd, string mess);\
 
-    void SendNumberToServer(string Number, string TargetClient);
+    void SendToServer(vector<string> commands, string command);
 
     bool IsDigit(string str);
-
+    
     vector<string> BreakString(string str, char sep);
 
 };
