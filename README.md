@@ -2,11 +2,11 @@
 # Overview
 in this project we want to familiar with `Socket Programming`. Client after connecting to server, send a number for another client. this transportation done with help of server. First server receive the number from source client and then send `number + 1` to target client.
  
-  - [`Architecture`](#Architecture)
-  - [`Client Class`](#Client-Class)
-  - [`Server Class`](#Server-Class)
-  - [`Project contents`](#Project-contents)
-  - [`How To Run`](#How-To-Run)
+  - [`Architecture`](#architecture)
+  - [`Client Class`](#client-class)
+  - [`Server Class`](#server-class)
+  - [`Project contents`](#project-contents)
+  - [`How To Run`](#how-to-run)
 
 ## Architecture
 Client connect to server with **Socket** and we use from [sockent.h](https://pubs.opengroup.org/onlinepubs/7908799/xns/syssocket.h.html) library.
